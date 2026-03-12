@@ -19,7 +19,7 @@ const { notFoundHandler, errorHandler } = require("./middleware/error.middleware
 const app = express();
 const { helmetMiddleware, rateLimitMiddleware } = buildSecurityMiddleware();
 
-const configuredCorsOrigins = String(process.env.CORS_ORIGIN || "http://localhost:5173").trim();
+const configuredCorsOrigins = String(process.env.CORS_ORIGIN || "https://zurickh.vercel.app/").trim();
 const allowAllOrigins = configuredCorsOrigins === "*";
 const allowedOrigins = configuredCorsOrigins
   .split(",")
