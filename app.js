@@ -19,6 +19,9 @@ const { notFoundHandler, errorHandler } = require("./middleware/error.middleware
 const app = express();
 const { helmetMiddleware, rateLimitMiddleware } = buildSecurityMiddleware();
 
+// Required behind Vercel/other reverse proxies so req.ip and rate limiting work correctly
+app.set('trust proxy', 1);
+
 const configuredCorsOrigins = String(process.env.CORS_ORIGIN || "https://zurickh.vercel.app").trim();
 const allowAllOrigins = configuredCorsOrigins === "*";
 const allowedOrigins = configuredCorsOrigins
@@ -57,6 +60,20 @@ app.use('/api/v1/admin', adminRouter);
 app.use('/api/v1/investments', investmentRouter);
 app.use('/api/v1/savings', savingsRouter);
 app.use('/api/v1/ledger', ledgerRouter);
+
+app.get('/', (req, res) => {
+  res.status(200).send({
+    success: true,
+    message: 'Banknode API is running',
+    data: {
+      docs: '/api/v1/health',
+    },
+  });
+});
+
+app.get('/favicon.ico', (req, res) => {
+  res.status(204).end();
+});
 
 app.get('/api/v1/health', (req, res) => {
   const dbStates = {
