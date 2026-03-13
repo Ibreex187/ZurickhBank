@@ -68,6 +68,12 @@ Required values:
 - `JWT_SECRET`
 - `CORS_ORIGIN` (frontend origin(s), comma-separated)
 
+Example `CORS_ORIGIN` for both local frontend and Vercel frontend:
+
+```env
+CORS_ORIGIN=http://localhost:3000,http://localhost:5173,https://<your-frontend>.vercel.app
+```
+
 ## Base URL
 
 - `http://localhost:4040/api/v1`
@@ -179,3 +185,26 @@ After deploy, your API base URL remains:
 - Verify public route: `GET /api/v1/investments/stocks`
 - Verify protected route with token: `GET /api/v1/auth/me`
 - Verify one transactional write flow (`/transactions/transfer`, `/savings/deposit`, or `/investments/buy`)
+
+## Localhost Fallback Strategy
+
+Keep both targets active with one codebase:
+
+1. Keep Vercel deployment for production traffic.
+2. Keep a local `.env` ready so API can boot immediately on localhost.
+3. Run fallback API locally with:
+
+   ```bash
+   npm install
+   npm run dev
+   ```
+
+4. Verify fallback health check:
+
+   - `GET http://localhost:4040/api/v1/health`
+
+5. If Vercel is down, point frontend/API client base URL to:
+
+   - `http://localhost:4040/api/v1`
+
+Recommended: expose localhost temporarily via a tunnel (for remote/mobile access) and update client base URL for the incident window.

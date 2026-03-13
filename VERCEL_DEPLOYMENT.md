@@ -75,3 +75,25 @@ If a deployment introduces issues:
 - Promote the previous successful deployment from Vercel dashboard.
 - Keep environment variables unchanged unless the incident is config-related.
 - Re-run post-deploy verification checklist after rollback.
+
+## 7) Localhost Emergency Fallback
+
+If Vercel and rollback are both unavailable, serve API from localhost immediately:
+
+1. Ensure local `.env` is configured (`DATABASE_URI`, `JWT_SECRET`, `CORS_ORIGIN`).
+2. Start API:
+
+   ```bash
+   npm install
+   npm run dev
+   ```
+
+3. Verify:
+
+   - `GET http://localhost:4040/api/v1/health`
+
+4. Switch frontend/API client base URL to:
+
+   - `http://localhost:4040/api/v1`
+
+Keep `CORS_ORIGIN` comma-separated to include both local frontend origins and your Vercel frontend domain.

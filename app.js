@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -22,16 +24,28 @@ const { helmetMiddleware, rateLimitMiddleware } = buildSecurityMiddleware();
 // Required behind Vercel/other reverse proxies so req.ip and rate limiting work correctly
 app.set('trust proxy', 1);
 
-const configuredCorsOrigins = String(process.env.CORS_ORIGIN || "https://zurickh.vercel.app").trim();
+const defaultCorsOrigins = [
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "https://zurickh.vercel.app"
+].join(",");
+
+const normalizeOrigin = (origin) => String(origin || '').trim().replace(/\/+$/, '');
+
+const configuredCorsOrigins = String(process.env.CORS_ORIGIN || defaultCorsOrigins).trim();
 const allowAllOrigins = configuredCorsOrigins === "*";
 const allowedOrigins = configuredCorsOrigins
   .split(",")
-  .map((origin) => origin.trim())
+  .map((origin) => normalizeOrigin(origin))
   .filter(Boolean);
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowAllOrigins || allowedOrigins.includes(origin)) {
+    const normalizedOrigin = normalizeOrigin(origin);
+
+    if (!origin || allowAllOrigins || allowedOrigins.includes(normalizedOrigin)) {
       return callback(null, true);
     }
 
