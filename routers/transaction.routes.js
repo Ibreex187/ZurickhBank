@@ -3,12 +3,13 @@ const router = express.Router();
 const authMiddleware = require("../middleware/auth.middleware")
 const { depositRules, withdrawRules, transferRules, transferRecipientLookupRules } = require('../validators/validation.rules')
 const validate = require('../middleware/express.validator.middleware');
+const { requireTransactionPin } = require('../middleware/transaction.pin.middleware');
 const {deposit, withdraw, transferFunds, getTransferRecipient} = require("../controllers/transaction.controller")
 
-router.post('/transactions/deposit', authMiddleware, depositRules(), validate, deposit)
-router.post('/transactions/withdraw', authMiddleware, withdrawRules(), validate, withdraw)
+router.post('/transactions/deposit', authMiddleware, depositRules(), validate, requireTransactionPin, deposit)
+router.post('/transactions/withdraw', authMiddleware, withdrawRules(), validate, requireTransactionPin, withdraw)
 router.get('/transactions/recipient', authMiddleware, transferRecipientLookupRules(), validate, getTransferRecipient)
-router.post('/transactions/transfer', authMiddleware, transferRules(), validate, transferFunds)
+router.post('/transactions/transfer', authMiddleware, transferRules(), validate, requireTransactionPin, transferFunds)
 
 
 

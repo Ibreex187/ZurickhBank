@@ -44,7 +44,8 @@ Content-Type: application/json
 Authorization: Bearer <your-jwt-token>
 
 {
-  "amount": 500.00
+  "amount": 500.00,
+  "transactionPin": "1234"
 }
 ```
 Transfers money from main balance to savings account.
@@ -56,7 +57,8 @@ Content-Type: application/json
 Authorization: Bearer <your-jwt-token>
 
 {
-  "amount": 200.00
+  "amount": 200.00,
+  "transactionPin": "1234"
 }
 ```
 Transfers money from savings account back to main balance.
@@ -69,7 +71,8 @@ Authorization: Bearer <your-jwt-token>
 
 {
   "amount": 300.00,
-  "direction": "to-savings"
+  "direction": "to-savings",
+  "transactionPin": "1234"
 }
 ```
 Quick transfer between accounts. Direction can be:
@@ -186,9 +189,14 @@ Common error scenarios:
 - Invalid amount (negative, zero, or too large)
 - Insufficient balance for deposits/withdrawals
 - Invalid direction for quick transfers
+- Missing/invalid transaction PIN format
 
 ### 401 Unauthorized
 - Missing or invalid JWT token
+- Incorrect transaction PIN
+
+### 403 Forbidden
+- Transaction PIN is not set yet
 
 ### 404 Not Found
 - User account not found

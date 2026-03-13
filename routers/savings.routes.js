@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/auth.middleware');
 const savingsController = require('../controllers/savings.controller');
+const { requireTransactionPin } = require('../middleware/transaction.pin.middleware');
+const { transactionPinRules } = require('../validators/validation.rules');
 const { body, query } = require('express-validator');
 const validationMiddleware = require('../middleware/express.validator.middleware');
 
@@ -50,13 +52,13 @@ const historyValidation = [
 router.use(authMiddleware);
 
 // Deposit money to savings (from main balance)
-router.post('/deposit', amountValidation, validationMiddleware, savingsController.depositToSavings);
+router.post('/deposit', [...amountValidation, ...transactionPinRules()], validationMiddleware, requireTransactionPin, savingsController.depositToSavings);
 
 // Withdraw money from savings (to main balance)
-router.post('/withdraw', amountValidation, validationMiddleware, savingsController.withdrawFromSavings);
+router.post('/withdraw', [...amountValidation, ...transactionPinRules()], validationMiddleware, requireTransactionPin, savingsController.withdrawFromSavings);
 
 // Quick transfer between main and savings
-router.post('/quick-transfer', quickTransferValidation, validationMiddleware, savingsController.quickTransfer);
+router.post('/quick-transfer', [...quickTransferValidation, ...transactionPinRules()], validationMiddleware, requireTransactionPin, savingsController.quickTransfer);
 
 // Get savings account overview and statistics
 router.get('/overview', savingsController.getSavingsOverview);

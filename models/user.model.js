@@ -6,6 +6,8 @@ lastName: {type: String, required: true},
 userName:{type: String, required: true, unique: true},
 email: {type: String, required: true, unique: true},
 password: {type: String, required: true},
+transactionPinHash: { type: String, default: null, select: false },
+transactionPinSetAt: { type: Date, default: null },
 accountNumber: {
     type: String,
     required: true,

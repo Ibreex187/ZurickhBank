@@ -57,7 +57,13 @@ const depositRules = () => {
         body('amount')
             .notEmpty().withMessage('Amount is required')
             .isFloat({ min: 0.01 }).withMessage('Deposit amount must be greater than 0')
-            .toFloat()
+            .toFloat(),
+
+        body('transactionPin')
+            .trim()
+            .notEmpty().withMessage('Transaction PIN is required')
+            .isLength({ min: 4, max: 4 }).withMessage('Transaction PIN must be exactly 4 digits')
+            .isNumeric().withMessage('Transaction PIN must contain only digits')
     ];
 };
 
@@ -67,7 +73,13 @@ const withdrawRules = () => {
         body('amount')
             .notEmpty().withMessage('Amount is required')
             .isFloat({ min: 0.01 }).withMessage('Withdrawal amount must be greater than 0')
-            .toFloat()
+            .toFloat(),
+
+        body('transactionPin')
+            .trim()
+            .notEmpty().withMessage('Transaction PIN is required')
+            .isLength({ min: 4, max: 4 }).withMessage('Transaction PIN must be exactly 4 digits')
+            .isNumeric().withMessage('Transaction PIN must contain only digits')
     ];
 };
 
@@ -83,7 +95,46 @@ const transferRules = () => {
             .trim()
             .notEmpty().withMessage('Receiver account number is required')
             .isLength({ min: 10, max: 10 }).withMessage('Account number must be exactly 10 digits')
-            .isNumeric().withMessage('Account number must contain only digits')
+            .isNumeric().withMessage('Account number must contain only digits'),
+
+        body('transactionPin')
+            .trim()
+            .notEmpty().withMessage('Transaction PIN is required')
+            .isLength({ min: 4, max: 4 }).withMessage('Transaction PIN must be exactly 4 digits')
+            .isNumeric().withMessage('Transaction PIN must contain only digits')
+    ];
+};
+
+const transactionPinRules = () => {
+    return [
+        body('transactionPin')
+            .trim()
+            .notEmpty().withMessage('Transaction PIN is required')
+            .isLength({ min: 4, max: 4 }).withMessage('Transaction PIN must be exactly 4 digits')
+            .isNumeric().withMessage('Transaction PIN must contain only digits')
+    ];
+};
+
+const setTransactionPinRules = () => {
+    return [
+        body('currentPassword')
+            .notEmpty().withMessage('Current password is required'),
+
+        body('transactionPin')
+            .trim()
+            .notEmpty().withMessage('Transaction PIN is required')
+            .isLength({ min: 4, max: 4 }).withMessage('Transaction PIN must be exactly 4 digits')
+            .isNumeric().withMessage('Transaction PIN must contain only digits'),
+
+        body('confirmTransactionPin')
+            .trim()
+            .notEmpty().withMessage('Confirm transaction PIN is required')
+            .custom((confirmTransactionPin, { req }) => {
+                if (confirmTransactionPin !== req.body.transactionPin) {
+                    throw new Error('Confirm transaction PIN must match transaction PIN');
+                }
+                return true;
+            })
     ];
 };
 
@@ -264,5 +315,7 @@ module.exports = {
     forgotPasswordVerifyRules,
     forgotPasswordResetRules,
     ledgerHistoryRules,
-    accountStatementRules
+    accountStatementRules,
+    transactionPinRules,
+    setTransactionPinRules
 };

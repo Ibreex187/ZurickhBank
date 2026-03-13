@@ -3,11 +3,12 @@ const {
 	getUserProfile,
 	updateUserProfile,
 	changePassword,
-	requestProfileUpdateOtp
+	requestProfileUpdateOtp,
+	setTransactionPin
 } = require('../controllers/user.controller');
 const { registerUser } = require('../controllers/authcontroller');
 const authMiddleware = require('../middleware/auth.middleware');
-const { registerRules, updateProfileRules, changePasswordRules } = require('../validators/validation.rules');
+const { registerRules, updateProfileRules, changePasswordRules, setTransactionPinRules } = require('../validators/validation.rules');
 const validate = require('../middleware/express.validator.middleware');
 const router = express.Router();
 
@@ -16,5 +17,6 @@ router.get('/users/profile', authMiddleware, getUserProfile);
 router.post('/users/profile/otp', authMiddleware, requestProfileUpdateOtp);
 router.put('/users/profile', authMiddleware, updateProfileRules(), validate, updateUserProfile);
 router.post('/users/change-password', authMiddleware, changePasswordRules(), validate, changePassword);
+router.post('/users/transaction-pin', authMiddleware, setTransactionPinRules(), validate, setTransactionPin);
 
 module.exports = router;

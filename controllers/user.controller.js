@@ -17,12 +17,54 @@ const getUserProfile = async (req, res) => {
         res.status(200).send({
             success: true,
             message: "User profile retrieved successfully",
-            data: user
+            data: {
+                ...user.toObject(),
+                hasTransactionPin: Boolean(user.transactionPinSetAt)
+            }
         });
     } catch (error) {
         res.status(500).send({
             success: false,
             message: "Error retrieving user profile"
+        });
+    }
+};
+
+const setTransactionPin = async (req, res) => {
+    try {
+        const { currentPassword, transactionPin } = req.body;
+
+        const user = await UserModel.findById(req.user.userId).select('password transactionPinSetAt');
+
+        if (!user) {
+            return res.status(404).send({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+
+        if (!isPasswordValid) {
+            return res.status(400).send({
+                success: false,
+                message: "Current password is incorrect"
+            });
+        }
+
+        user.transactionPinHash = await bcrypt.hash(String(transactionPin), 10);
+        const hadTransactionPin = Boolean(user.transactionPinSetAt);
+        user.transactionPinSetAt = new Date();
+        await user.save();
+
+        return res.status(200).send({
+            success: true,
+            message: hadTransactionPin ? "Transaction PIN updated successfully" : "Transaction PIN set successfully"
+        });
+    } catch (error) {
+        return res.status(500).send({
+            success: false,
+            message: "Error setting transaction PIN"
         });
     }
 };
@@ -207,5 +249,6 @@ module.exports = {
     getUserProfile,
     updateUserProfile,
     changePassword,
-    requestProfileUpdateOtp
+    requestProfileUpdateOtp,
+    setTransactionPin
 };

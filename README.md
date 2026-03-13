@@ -100,9 +100,37 @@ CORS_ORIGIN=http://localhost:3000,http://localhost:5173,https://<your-frontend>.
 - `GET /api/v1/transactions/history`
 - `GET /api/v1/transactions/history/summary`
 - `GET /api/v1/transactions/history/:transactionId`
+- `POST /api/v1/users/transaction-pin` (set/update 4-digit transaction PIN)
 - `POST /api/v1/beneficiaries/add`
 - `GET /api/v1/beneficiaries`
 - `DELETE /api/v1/beneficiaries/:beneficiaryId`
+
+## Transaction PIN (Required for Money Movement)
+
+Before transfers/deposits/withdrawals, user must set a 4-digit transaction PIN.
+
+Set or update PIN:
+
+- `POST /api/v1/users/transaction-pin`
+- Requires `Authorization: Bearer <token>`
+- Body:
+
+```json
+{
+   "currentPassword": "your-login-password",
+   "transactionPin": "1234",
+   "confirmTransactionPin": "1234"
+}
+```
+
+Then include `transactionPin` in money-moving request bodies:
+
+- `POST /api/v1/transactions/deposit`
+- `POST /api/v1/transactions/withdraw`
+- `POST /api/v1/transactions/transfer`
+- `POST /api/v1/savings/deposit`
+- `POST /api/v1/savings/withdraw`
+- `POST /api/v1/savings/quick-transfer`
 
 ## API References
 

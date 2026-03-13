@@ -106,6 +106,7 @@ const getMe = async (req, res) => {
                 accountNumber: foundUser.accountNumber,
                 balance: foundUser.balance,
                 savingsBalance: foundUser.savingsBalance,
+                hasTransactionPin: Boolean(foundUser.transactionPinSetAt),
                 roles: foundUser.roles,
                 createdAt: foundUser.createdAt,
                 updatedAt: foundUser.updatedAt,
