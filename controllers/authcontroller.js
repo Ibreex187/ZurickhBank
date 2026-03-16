@@ -53,21 +53,23 @@ const registerUser = async (req, res) =>{
 const loginUser = async (req, res) =>{
     try {
          
-        const {email, password} = req.body;
-        if(!email || !password){
+        const normalizedUserName = String(req.body.userName || "").trim();
+        const { password } = req.body;
+
+        if(!normalizedUserName || !password){
             return res.status(400).send({success:false, 
-            message:"Email and password are required"})
+            message:"Username and password are required"})
         }
 
-         const foundUser = await user.findOne({email})
+         const foundUser = await user.findOne({ userName: normalizedUserName })
         if(!foundUser){
             return res.status(400).send({success:false, 
-            message:"Invalid email or password"})
+            message:"Invalid username or password"})
         }
         const isMatch = await bcrypt.compare(password, foundUser.password)
         if(!isMatch){
             return res.status(400).send({success:false, 
-            message:"Invalid email or password"})
+            message:"Invalid username or password"})
         }
         const token = jwt.sign({userId: foundUser._id}, process.env.JWT_SECRET, {expiresIn:"7d"})
         res.status(200).send({success:true, 

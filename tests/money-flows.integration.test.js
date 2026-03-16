@@ -35,7 +35,7 @@ const registerAndLogin = async ({
 
   const loginResponse = await request(app)
     .post("/api/v1/auth/login")
-    .send({ email, password });
+    .send({ userName, password });
 
   expect(loginResponse.statusCode).toBe(200);
 
@@ -211,13 +211,14 @@ describe("Money flow integration", () => {
 
   it("resets forgot-password and rejects old password", async () => {
     const email = "reset.case@example.com";
+    const userName = "resetcase";
     const oldPassword = "securePass1";
     const newPassword = "securePass2";
 
     await registerAndLogin({
       firstName: "Reset",
       lastName: "Case",
-      userName: "resetcase",
+      userName,
       email,
       password: oldPassword
     });
@@ -259,14 +260,14 @@ describe("Money flow integration", () => {
 
     const oldPasswordLogin = await request(app)
       .post("/api/v1/auth/login")
-      .send({ email, password: oldPassword });
+      .send({ userName, password: oldPassword });
 
     expect(oldPasswordLogin.statusCode).toBe(400);
     expect(oldPasswordLogin.body.success).toBe(false);
 
     const newPasswordLogin = await request(app)
       .post("/api/v1/auth/login")
-      .send({ email, password: newPassword });
+      .send({ userName, password: newPassword });
 
     expect(newPasswordLogin.statusCode).toBe(200);
     expect(newPasswordLogin.body.success).toBe(true);
@@ -275,13 +276,14 @@ describe("Money flow integration", () => {
 
   it("changes password while logged in without OTP", async () => {
     const email = "change.password@example.com";
+    const userName = "changepassworduser";
     const currentPassword = "securePass1";
     const newPassword = "securePass9";
 
     const { token } = await registerAndLogin({
       firstName: "Change",
       lastName: "Password",
-      userName: "changepassworduser",
+      userName,
       email,
       password: currentPassword
     });
@@ -299,14 +301,14 @@ describe("Money flow integration", () => {
 
     const oldPasswordLogin = await request(app)
       .post("/api/v1/auth/login")
-      .send({ email, password: currentPassword });
+      .send({ userName, password: currentPassword });
 
     expect(oldPasswordLogin.statusCode).toBe(400);
     expect(oldPasswordLogin.body.success).toBe(false);
 
     const newPasswordLogin = await request(app)
       .post("/api/v1/auth/login")
-      .send({ email, password: newPassword });
+      .send({ userName, password: newPassword });
 
     expect(newPasswordLogin.statusCode).toBe(200);
     expect(newPasswordLogin.body.success).toBe(true);

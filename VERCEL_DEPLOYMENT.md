@@ -57,6 +57,7 @@ Assuming base URL `https://<your-vercel-domain>`:
 3. Auth flow
    - `POST /api/v1/auth/register`
    - `POST /api/v1/auth/login`
+   - Login body uses `userName` and `password` (email is not accepted for login)
    - `GET /api/v1/auth/me` (with bearer token)
 4. Money movement sanity check
    - One of: `/api/v1/transactions/transfer`, `/api/v1/savings/deposit`, `/api/v1/investments/buy`
@@ -67,6 +68,18 @@ Assuming base URL `https://<your-vercel-domain>`:
 - Write endpoints use MongoDB transactions, so `DATABASE_URI` must point to a replica set capable deployment.
 - CORS failures are usually caused by `CORS_ORIGIN` mismatch.
 - If OTP emails fail in production, verify SMTP env values and provider restrictions.
+
+### Login Request Example
+
+```http
+POST /api/v1/auth/login
+Content-Type: application/json
+
+{
+   "userName": "johndoe",
+   "password": "securePass1"
+}
+```
 
 ## 6) Rollback
 

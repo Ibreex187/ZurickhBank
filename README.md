@@ -114,6 +114,7 @@ CORS_ORIGIN=http://localhost:3000,http://localhost:5173,https://<your-frontend>.
 
 - Canonical registration endpoint: `POST /api/v1/auth/register`
 - Canonical login endpoint: `POST /api/v1/auth/login`
+- Login credentials are `userName` + `password` (email is not accepted for login)
 - Backward-compatible registration alias is also available at `POST /api/v1/users`
 
 ## Common Protected Endpoints

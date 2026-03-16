@@ -40,10 +40,12 @@ const registerRules = () => {
 // Login validation
 const loginRules = () => {
     return [
-        body('email')
+        body('userName')
             .trim()
-            .notEmpty().withMessage('Email is required')
-            .isEmail().withMessage('Email must be valid'),
+            .notEmpty().withMessage('Username is required')
+            .isLength({ min: 3 }).withMessage('Username must be at least 3 characters')
+            .isLength({ max: 30 }).withMessage('Username cannot exceed 30 characters')
+            .isAlphanumeric().withMessage('Username must contain only alphanumeric characters'),
             
         
         body('password')
