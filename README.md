@@ -1,5 +1,26 @@
 # Banknode API
 
+## Signup Bonus & Email Policy
+
+**Signup Bonus Policy:**
+
+- A signup bonus is only granted to an email address the first time it is ever used to register an account.
+- If a user changes their profile email, the new email is permanently recorded as used and cannot receive a signup bonus in the future.
+- If anyone tries to register with an email that was ever previously used (even if the original user changed away from it), that account will not receive the signup bonus.
+- This prevents abuse where users could cycle emails to repeatedly claim bonuses.
+
+**Technical details:**
+- All emails are normalized (lowercased, trimmed) before checks.
+- Email usage is tracked in a dedicated registry collection.
+- Bonus eligibility is checked at registration and updated on profile email change.
+
+**Example:**
+1. User A registers with alice@email.com → gets signup bonus.
+2. User A changes profile email to alice2@email.com → alice2@email.com is now ineligible for bonus.
+3. User B tries to register with alice@email.com → no signup bonus is granted.
+
+This policy ensures each email can only ever receive a signup bonus once, regardless of profile edits or re-registration attempts.
+
 Backend API for a banking app with authentication, user profile management, transfers, beneficiaries, savings, investments, and admin transaction views.
 
 ## Tech Stack

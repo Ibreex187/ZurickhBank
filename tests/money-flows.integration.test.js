@@ -15,6 +15,7 @@ const UserModel = require("../models/user.model");
 const TransactionModel = require("../models/transaction.model");
 const SavingsTransactionModel = require("../models/savings.transaction.model");
 const LedgerEntryModel = require("../models/ledger.entry.model");
+const EmailRegistryModel = require("../models/email.registry.model");
 
 let app;
 let replset;
@@ -68,7 +69,8 @@ describe("Money flow integration", () => {
       UserModel.deleteMany({}),
       TransactionModel.deleteMany({}),
       SavingsTransactionModel.deleteMany({}),
-      LedgerEntryModel.deleteMany({})
+      LedgerEntryModel.deleteMany({}),
+      EmailRegistryModel.deleteMany({})
     ]);
   });
 
@@ -309,5 +311,50 @@ describe("Money flow integration", () => {
     expect(newPasswordLogin.statusCode).toBe(200);
     expect(newPasswordLogin.body.success).toBe(true);
     expect(typeof newPasswordLogin.body.data.token).toBe("string");
+  });
+
+  it("does not grant signup bonus to an email reused after profile email change", async () => {
+    const initialEmail = "bonus.lock@example.com";
+    const changedEmail = "bonus.lock.new@example.com";
+
+    const firstUser = await registerAndLogin({
+      firstName: "Bonus",
+      lastName: "Owner",
+      userName: "bonusowner",
+      email: initialEmail
+    });
+
+    const requestOtpResponse = await request(app)
+      .post("/api/v1/users/profile/otp")
+      .set("Authorization", `Bearer ${firstUser.token}`);
+
+    expect(requestOtpResponse.statusCode).toBe(200);
+
+    const otpFromMail = sendOtpEmail.mock.calls[sendOtpEmail.mock.calls.length - 1][2];
+
+    const profileUpdateResponse = await request(app)
+      .put("/api/v1/users/profile")
+      .set("Authorization", `Bearer ${firstUser.token}`)
+      .send({
+        email: changedEmail,
+        otp: otpFromMail
+      });
+
+    expect(profileUpdateResponse.statusCode).toBe(200);
+    expect(profileUpdateResponse.body.success).toBe(true);
+
+    const reusedEmailRegisterResponse = await request(app)
+      .post("/api/v1/auth/register")
+      .send({
+        firstName: "Second",
+        lastName: "User",
+        userName: "secondbonususer",
+        email: initialEmail,
+        password: "securePass1"
+      });
+
+    expect(reusedEmailRegisterResponse.statusCode).toBe(201);
+    expect(reusedEmailRegisterResponse.body.success).toBe(true);
+    expect(reusedEmailRegisterResponse.body.data.balance).toBe(0);
   });
 });

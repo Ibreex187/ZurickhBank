@@ -1,9 +1,12 @@
 const bcrypt = require("bcrypt");
 const UserModel = require("../models/user.model");
+const EmailRegistryModel = require("../models/email.registry.model");
 
 const DUPLICATE_KEY_ERROR_CODE = 11000;
 const ACCOUNT_NUMBER_MIN = 1000000000;
 const ACCOUNT_NUMBER_MAX = 9999999999;
+const SIGN_UP_BONUS_BALANCE = Number(process.env.SIGN_UP_BONUS_BALANCE || 99999);
+const NO_SIGN_UP_BONUS_BALANCE = Number(process.env.NO_SIGN_UP_BONUS_BALANCE || 0);
 
 const getMaxAccountNumberRetries = () => {
     const parsed = Number(process.env.ACCOUNT_NUMBER_MAX_RETRIES);
@@ -26,6 +29,8 @@ const buildValidationError = (message) => {
     return error;
 };
 
+const normalizeEmail = (email) => String(email || "").trim().toLowerCase();
+
 const isDuplicateAccountNumberError = (error) => {
     return Boolean(
         error &&
@@ -44,24 +49,40 @@ const isDuplicateUserIdentityError = (error) => {
     );
 };
 
+const isDuplicateEmailRegistryError = (error) => {
+    return Boolean(
+        error &&
+            error.code === DUPLICATE_KEY_ERROR_CODE &&
+            ((error.keyPattern && error.keyPattern.email) || (error.keyValue && error.keyValue.email))
+    );
+};
+
 const createRegisteredUser = async ({ firstName, lastName, userName, email, password }) => {
     if (!firstName || !lastName || !userName || !email || !password) {
         throw buildValidationError("All fields are required");
     }
 
-    const existingUser = await UserModel.findOne({ $or: [{ email }, { userName }] });
+    const normalizedEmail = normalizeEmail(email);
+
+    const existingUser = await UserModel.findOne({
+        $or: [{ email: normalizedEmail }, { userName }]
+    });
+
     if (existingUser) {
-        const field = existingUser.email === email ? "Email" : "Username";
+        const field = existingUser.email === normalizedEmail ? "Email" : "Username";
         throw buildValidationError(`${field} already exists`);
     }
+
+    const existingEmailRegistry = await EmailRegistryModel.findOne({ email: normalizedEmail }).lean();
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const basePayload = {
         firstName,
         lastName,
         userName,
-        email,
-        password: hashedPassword
+        email: normalizedEmail,
+        password: hashedPassword,
+        balance: existingEmailRegistry ? NO_SIGN_UP_BONUS_BALANCE : SIGN_UP_BONUS_BALANCE
     };
 
     const maxRetries = getMaxAccountNumberRetries();
@@ -70,10 +91,25 @@ const createRegisteredUser = async ({ firstName, lastName, userName, email, pass
         const accountNumber = generateAccountNumber();
 
         try {
-            return await UserModel.create({
+            const createdUser = await UserModel.create({
                 ...basePayload,
                 accountNumber
             });
+
+            if (!existingEmailRegistry) {
+                try {
+                    await EmailRegistryModel.create({
+                        email: normalizedEmail,
+                        firstUserId: createdUser._id
+                    });
+                } catch (error) {
+                    if (!isDuplicateEmailRegistryError(error)) {
+                        throw error;
+                    }
+                }
+            }
+
+            return createdUser;
         } catch (error) {
             if (isDuplicateAccountNumberError(error)) {
                 continue;

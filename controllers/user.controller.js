@@ -1,7 +1,19 @@
 const UserModel = require("../models/user.model");
+const EmailRegistryModel = require("../models/email.registry.model");
 const bcrypt = require("bcrypt");
 const { sendOtpEmail } = require("../utils/mailer");
 const { issueOtp, verifyOtp, OTP_EXPIRY_MINUTES } = require("../utils/otp.service");
+const DUPLICATE_KEY_ERROR_CODE = 11000;
+
+const normalizeEmail = (email) => String(email || "").trim().toLowerCase();
+
+const isDuplicateEmailRegistryError = (error) => {
+    return Boolean(
+        error &&
+            error.code === DUPLICATE_KEY_ERROR_CODE &&
+            ((error.keyPattern && error.keyPattern.email) || (error.keyValue && error.keyValue.email))
+    );
+};
 
 const getUserProfile = async (req, res) => {
     try {
@@ -73,6 +85,7 @@ const updateUserProfile = async (req, res) => {
     try {
         const { firstName, lastName, userName, email, otp } = req.body;
         const updateData = {};
+        const normalizedEmail = email ? normalizeEmail(email) : null;
 
         const currentUser = await UserModel.findById(req.user.userId).select('email');
         if (!currentUser) {
@@ -86,7 +99,7 @@ const updateUserProfile = async (req, res) => {
         if (firstName) updateData.firstName = firstName;
         if (lastName) updateData.lastName = lastName;
         if (userName) updateData.userName = userName;
-        if (email) updateData.email = email;
+        if (normalizedEmail) updateData.email = normalizedEmail;
 
         if (Object.keys(updateData).length === 0) {
             return res.status(400).send({
@@ -99,11 +112,11 @@ const updateUserProfile = async (req, res) => {
         if (userName || email) {
             const query = { _id: { $ne: req.user.userId } };
             if (userName && email) {
-                query.$or = [{ userName }, { email }];
+                query.$or = [{ userName }, { email: normalizedEmail }];
             } else if (userName) {
                 query.userName = userName;
             } else if (email) {
-                query.email = email;
+                query.email = normalizedEmail;
             }
 
             const existingUser = await UserModel.findOne(query);
@@ -141,6 +154,19 @@ const updateUserProfile = async (req, res) => {
                 success: false,
                 message: "User not found"
             });
+        }
+
+        if (normalizedEmail && normalizedEmail !== currentUser.email) {
+            try {
+                await EmailRegistryModel.create({
+                    email: normalizedEmail,
+                    firstUserId: req.user.userId
+                });
+            } catch (error) {
+                if (!isDuplicateEmailRegistryError(error)) {
+                    throw error;
+                }
+            }
         }
 
         res.status(200).send({
