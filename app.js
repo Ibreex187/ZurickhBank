@@ -15,6 +15,7 @@ const adminRouter = require("./routers/admin.routes");
 const investmentRouter = require("./routers/investment.routes");
 const savingsRouter = require("./routers/savings.routes");
 const ledgerRouter = require("./routers/ledger.routes");
+const notificationRouter = require("./routers/notification.routes");
 const { buildSecurityMiddleware } = require("./middleware/security.middleware");
 const { notFoundHandler, errorHandler } = require("./middleware/error.middleware");
 
@@ -74,6 +75,7 @@ app.use('/api/v1/admin', adminRouter);
 app.use('/api/v1/investments', investmentRouter);
 app.use('/api/v1/savings', savingsRouter);
 app.use('/api/v1/ledger', ledgerRouter);
+app.use('/api/v1', notificationRouter);
 
 app.get('/', (req, res) => {
   res.status(200).send({

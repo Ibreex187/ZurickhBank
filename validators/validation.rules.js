@@ -1,4 +1,4 @@
-const { body, query } = require('express-validator');
+const { body, query, param } = require('express-validator');
 const validate = require('../middleware/express.validator.middleware');
 // Register validation
 const registerRules = () => {
@@ -318,6 +318,59 @@ const accountStatementRules = () => {
     ];
 };
 
+const notificationListRules = () => {
+    return [
+        query('page')
+            .optional()
+            .isInt({ min: 1 }).withMessage('page must be a positive integer')
+            .toInt(),
+
+        query('limit')
+            .optional()
+            .isInt({ min: 1, max: 100 }).withMessage('limit must be between 1 and 100')
+            .toInt(),
+
+        query('unreadOnly')
+            .optional()
+            .isIn(['true', 'false']).withMessage('unreadOnly must be true or false'),
+
+        query('category')
+            .optional()
+            .isIn(['debit', 'credit', 'transfer', 'security']).withMessage('category is invalid')
+    ];
+};
+
+const notificationIdParamRules = () => {
+    return [
+        param('notificationId')
+            .isMongoId().withMessage('notificationId must be a valid MongoDB id')
+    ];
+};
+
+const notificationPreferenceRules = () => {
+    return [
+        body('emailByCategory')
+            .optional()
+            .isObject().withMessage('emailByCategory must be an object'),
+
+        body('emailByCategory.debit')
+            .optional()
+            .isBoolean().withMessage('emailByCategory.debit must be a boolean'),
+
+        body('emailByCategory.credit')
+            .optional()
+            .isBoolean().withMessage('emailByCategory.credit must be a boolean'),
+
+        body('emailByCategory.transfer')
+            .optional()
+            .isBoolean().withMessage('emailByCategory.transfer must be a boolean'),
+
+        body('emailByCategory.security')
+            .optional()
+            .isBoolean().withMessage('emailByCategory.security must be a boolean')
+    ];
+};
+
 module.exports = {
     registerRules,
     loginRules,
@@ -334,5 +387,8 @@ module.exports = {
     ledgerHistoryRules,
     accountStatementRules,
     transactionPinRules,
-    setTransactionPinRules
+    setTransactionPinRules,
+    notificationListRules,
+    notificationIdParamRules,
+    notificationPreferenceRules
 };

@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const { sendOtpEmail } = require("../utils/mailer");
 const { issueOtp, verifyOtp, OTP_EXPIRY_MINUTES } = require("../utils/otp.service");
 const { calculatePremiumStatus } = require("../utils/premium.service");
+const { createNotification } = require("../utils/notification.service");
 const DUPLICATE_KEY_ERROR_CODE = 11000;
 
 const normalizeEmail = (email) => String(email || "").trim().toLowerCase();
@@ -69,6 +70,20 @@ const setTransactionPin = async (req, res) => {
         const hadTransactionPin = Boolean(user.transactionPinSetAt);
         user.transactionPinSetAt = new Date();
         await user.save();
+
+        await createNotification({
+            userId: user._id,
+            category: "security",
+            title: hadTransactionPin ? "Transaction PIN changed" : "Transaction PIN set",
+            message: hadTransactionPin
+                ? "Your transaction PIN was changed successfully"
+                : "Your transaction PIN was set successfully",
+            metadata: {
+                event: hadTransactionPin ? "pin_changed" : "pin_set",
+                requestIp: req.ip,
+                requestId: req.requestId
+            }
+        });
 
         return res.status(200).send({
             success: true,

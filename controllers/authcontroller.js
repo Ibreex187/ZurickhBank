@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken")
 const {sendWelcomeEmail, sendOtpEmail} = require("../utils/mailer")
 const { issueOtp, verifyOtp, OTP_EXPIRY_MINUTES } = require("../utils/otp.service")
 const { createRegisteredUser } = require("../utils/user.registration.service")
+const { createNotification } = require("../utils/notification.service");
 
 const FORGOT_PASSWORD_RESET_TOKEN_TTL_MINUTES = Number(process.env.FORGOT_PASSWORD_RESET_TOKEN_TTL_MINUTES || OTP_EXPIRY_MINUTES || 10);
 
@@ -67,6 +68,17 @@ const loginUser = async (req, res) =>{
         }
         const isMatch = await bcrypt.compare(password, foundUser.password)
         if(!isMatch){
+            await createNotification({
+                userId: foundUser._id,
+                category: "security",
+                title: "Failed login attempt",
+                message: "A failed login attempt was detected on your account",
+                metadata: {
+                    event: "failed_login",
+                    requestIp: req.ip,
+                    requestId: req.requestId
+                }
+            });
             return res.status(400).send({success:false, 
             message:"Invalid username or password"})
         }

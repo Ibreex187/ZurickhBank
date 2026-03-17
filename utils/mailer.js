@@ -104,4 +104,30 @@ async function sendOtpEmail(to, name, otp, context = 'verification') {
   return info;
 }
 
-module.exports = { sendWelcomeEmail, sendOtpEmail };
+async function sendNotificationEmail({ to, name, title, message }) {
+  if (!to) throw new Error('Missing recipient email');
+
+  const { transporter, hasSmtpConfig } = await createTransporter();
+  const fromAddress = process.env.FROM_EMAIL || process.env.SMTP_USER || 'no-reply@example.com';
+
+  const mailOptions = {
+    from: fromAddress,
+    to,
+    subject: title || 'Zurich Bank Notification',
+    html: `
+      <p>Hi ${name || 'there'},</p>
+      <p>${message || 'You have a new notification.'}</p>
+      <p>— Zurich Bank Team</p>
+    `,
+  };
+
+  const info = await transporter.sendMail(mailOptions);
+
+  if (!hasSmtpConfig) {
+    console.log('Ethereal preview URL:', nodemailer.getTestMessageUrl(info));
+  }
+
+  return info;
+}
+
+module.exports = { sendWelcomeEmail, sendOtpEmail, sendNotificationEmail };

@@ -3,6 +3,7 @@ const TransactionModel = require("../models/transaction.model")
 const { randomUUID } = require("crypto");
 const mongoose = require("mongoose");
 const { postJournal } = require("../utils/ledger.service");
+const { createNotification } = require("../utils/notification.service");
 
 
 exports.deposit = async (req, res) => {
@@ -52,6 +53,19 @@ exports.deposit = async (req, res) => {
                         credit: parsedAmount
                     }
                 ]
+            });
+
+            await createNotification({
+                userId: user._id,
+                category: "credit",
+                title: "Deposit successful",
+                message: `Your account was credited with ${parsedAmount}`,
+                metadata: {
+                    transactionId: transaction.transactionId,
+                    amount: parsedAmount,
+                    type: "deposit"
+                },
+                session
             });
        })
 
@@ -130,6 +144,19 @@ exports.withdraw = async (req, res) =>{
                             credit: parsedAmount
                         }
                     ]
+                });
+
+                await createNotification({
+                    userId: user._id,
+                    category: "debit",
+                    title: "Withdrawal successful",
+                    message: `Your account was debited by ${parsedAmount}`,
+                    metadata: {
+                        transactionId: transaction.transactionId,
+                        amount: parsedAmount,
+                        type: "withdraw"
+                    },
+                    session
                 });
            })
 
@@ -231,6 +258,34 @@ exports.transferFunds = async (req, res) =>{
                         credit: parsedAmount
                     }
                 ]
+            });
+
+            await createNotification({
+                userId: sender._id,
+                category: "transfer",
+                title: "Transfer sent",
+                message: `You sent ${parsedAmount} to ${receiver.firstName} ${receiver.lastName}`,
+                metadata: {
+                    transactionId: transaction.transactionId,
+                    amount: parsedAmount,
+                    direction: "outgoing",
+                    accountNumber: receiver.accountNumber
+                },
+                session
+            });
+
+            await createNotification({
+                userId: receiver._id,
+                category: "transfer",
+                title: "Transfer received",
+                message: `You received ${parsedAmount} from ${sender.firstName} ${sender.lastName}`,
+                metadata: {
+                    transactionId: transaction.transactionId,
+                    amount: parsedAmount,
+                    direction: "incoming",
+                    accountNumber: sender.accountNumber
+                },
+                session
             });
           })
 
