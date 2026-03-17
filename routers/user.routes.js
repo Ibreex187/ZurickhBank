@@ -4,7 +4,8 @@ const {
 	updateUserProfile,
 	changePassword,
 	requestProfileUpdateOtp,
-	setTransactionPin
+	setTransactionPin,
+	getPremiumStatus
 } = require('../controllers/user.controller');
 const { registerUser } = require('../controllers/authcontroller');
 const authMiddleware = require('../middleware/auth.middleware');
@@ -18,5 +19,6 @@ router.post('/users/profile/otp', authMiddleware, requestProfileUpdateOtp);
 router.put('/users/profile', authMiddleware, updateProfileRules(), validate, updateUserProfile);
 router.post('/users/change-password', authMiddleware, changePasswordRules(), validate, changePassword);
 router.post('/users/transaction-pin', authMiddleware, setTransactionPinRules(), validate, setTransactionPin);
+router.get('/users/premium-status', authMiddleware, getPremiumStatus);
 
 module.exports = router;

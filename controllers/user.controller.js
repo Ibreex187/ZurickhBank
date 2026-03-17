@@ -3,6 +3,7 @@ const EmailRegistryModel = require("../models/email.registry.model");
 const bcrypt = require("bcrypt");
 const { sendOtpEmail } = require("../utils/mailer");
 const { issueOtp, verifyOtp, OTP_EXPIRY_MINUTES } = require("../utils/otp.service");
+const { calculatePremiumStatus } = require("../utils/premium.service");
 const DUPLICATE_KEY_ERROR_CODE = 11000;
 
 const normalizeEmail = (email) => String(email || "").trim().toLowerCase();
@@ -271,10 +272,38 @@ const requestProfileUpdateOtp = async (req, res) => {
     }
 };
 
+const getPremiumStatus = async (req, res) => {
+    try {
+        const user = await UserModel.findById(req.user.userId)
+            .select('-password -transactionPinHash');
+
+        if (!user) {
+            return res.status(404).send({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        const premiumStatus = await calculatePremiumStatus(user);
+
+        return res.status(200).send({
+            success: true,
+            message: "Premium status retrieved successfully",
+            data: premiumStatus
+        });
+    } catch (error) {
+        return res.status(500).send({
+            success: false,
+            message: "Error calculating premium status"
+        });
+    }
+};
+
 module.exports = {
     getUserProfile,
     updateUserProfile,
     changePassword,
     requestProfileUpdateOtp,
-    setTransactionPin
+    setTransactionPin,
+    getPremiumStatus
 };
