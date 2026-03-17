@@ -52,8 +52,7 @@ const registerUser = async (req, res) =>{
 
 const loginUser = async (req, res) =>{
     try {
-         
-        const normalizedUserName = String(req.body.userName || "").trim();
+        const normalizedUserName = String(req.body.userName || req.body.username || "").trim();
         const { password } = req.body;
 
         if(!normalizedUserName || !password){

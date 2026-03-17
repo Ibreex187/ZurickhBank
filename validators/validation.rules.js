@@ -41,11 +41,26 @@ const registerRules = () => {
 const loginRules = () => {
     return [
         body('userName')
+            .optional({ nullable: true })
             .trim()
-            .notEmpty().withMessage('Username is required')
             .isLength({ min: 3 }).withMessage('Username must be at least 3 characters')
             .isLength({ max: 30 }).withMessage('Username cannot exceed 30 characters')
             .isAlphanumeric().withMessage('Username must contain only alphanumeric characters'),
+
+        body('username')
+            .optional({ nullable: true })
+            .trim()
+            .isLength({ min: 3 }).withMessage('Username must be at least 3 characters')
+            .isLength({ max: 30 }).withMessage('Username cannot exceed 30 characters')
+            .isAlphanumeric().withMessage('Username must contain only alphanumeric characters'),
+
+        body().custom((_, { req }) => {
+            const incomingUserName = String(req.body.userName || req.body.username || '').trim();
+            if (!incomingUserName) {
+                throw new Error('Username is required');
+            }
+            return true;
+        }),
             
         
         body('password')
