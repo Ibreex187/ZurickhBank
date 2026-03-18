@@ -89,6 +89,23 @@ Required values:
 - `JWT_SECRET`
 - `CORS_ORIGIN` (frontend origin(s), comma-separated)
 
+Optional transaction abuse controls:
+
+- `WITHDRAW_DAILY_LIMIT` (default: `200000`)
+- `WITHDRAW_MONTHLY_LIMIT` (default: `2000000`)
+- `TRANSFER_DAILY_LIMIT` (default: `500000`)
+- `TRANSFER_MONTHLY_LIMIT` (default: `5000000`)
+
+Tier-specific overrides (higher priority than global values):
+
+- Supported tiers: `unverified`, `tier1`, `tier2`, `tier3`
+- Format: `<TIER>_<OPERATION>_<PERIOD>_LIMIT`
+- Examples:
+   - `UNVERIFIED_TRANSFER_DAILY_LIMIT=100000`
+   - `TIER1_TRANSFER_MONTHLY_LIMIT=5000000`
+   - `TIER2_WITHDRAW_DAILY_LIMIT=500000`
+   - `TIER3_WITHDRAW_MONTHLY_LIMIT=15000000`
+
 Example `CORS_ORIGIN` for both local frontend and Vercel frontend:
 
 ```env
@@ -169,7 +186,31 @@ Use this endpoint to confirm recipient name while entering account number before
 - Requires `Authorization: Bearer <token>`
 - Returns recipient `name` and `accountNumber` when found
 
-## Ledger Query Endpoints
+## Admin KYC Tier Management
+
+**Update user tier:**
+
+- `PATCH /api/v1/admin/users/:userId/kyc-tier`
+- Requires admin token
+- Body:
+
+```json
+{
+  "kycTier": "unverified"
+}
+```
+
+Allowed values: `unverified`, `tier1`, `tier2`, `tier3`.
+
+**List/filter users by tier:**
+
+- `GET /api/v1/admin/users`
+- Requires admin token
+- Optional query parameters:
+  - `kycTier` (filter by tier: `unverified`, `tier1`, `tier2`, `tier3`)
+  - `page` (default: 1)
+  - `limit` (max: 100, default: 20)
+- Returns paginated list with user KYC tier, balance, and account creation date
 
 - `GET /api/v1/ledger/history`
    - Requires `Authorization: Bearer <token>`

@@ -17,6 +17,7 @@ accountNumber: {
 balance: {type: Number, default: 99999},
 savingsBalance: {type: Number, default: 0},
 beneficiaries: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
+kycTier: { type: String, enum: ["unverified", "tier1", "tier2", "tier3"], default: "unverified" },
     roles: {type: String, enum:["user", "admin"], default:"user"}
 }, {timestamps:true, strict:"throw"})
 

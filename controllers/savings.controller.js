@@ -3,6 +3,7 @@ const SavingsTransactionModel = require("../models/savings.transaction.model");
 const { randomUUID } = require("crypto");
 const mongoose = require("mongoose");
 const { postJournal } = require("../utils/ledger.service");
+const { assertOutgoingLimit } = require("../utils/transaction.limit.service");
 
 // Deposit money to savings (from main balance)
 exports.depositToSavings = async (req, res) => {
@@ -122,6 +123,12 @@ exports.withdrawFromSavings = async (req, res) => {
                 message: "Valid amount is required (must be greater than 0)"
             });
         }
+
+        await assertOutgoingLimit({
+            userId: new mongoose.Types.ObjectId(userId),
+            operation: "withdraw",
+            amount: parsedAmount
+        });
 
         let transactionId;
         let newBalance;

@@ -4,6 +4,7 @@ const { randomUUID } = require("crypto");
 const mongoose = require("mongoose");
 const { postJournal } = require("../utils/ledger.service");
 const { createNotification } = require("../utils/notification.service");
+const { assertOutgoingLimit } = require("../utils/transaction.limit.service");
 
 
 exports.deposit = async (req, res) => {
@@ -79,7 +80,8 @@ exports.deposit = async (req, res) => {
             if (error.statusCode) {
                 return res.status(error.statusCode).send({
                     success: false,
-                    message: error.message
+                    message: error.message,
+                    ...(error.details || {})
                 });
             }
         res.status(500).send({success:false,
@@ -99,6 +101,12 @@ exports.withdraw = async (req, res) =>{
             return res.status(400).send({success:false, 
             message:"withdrawal must be greater than 0"})
            }
+
+             await assertOutgoingLimit({
+                 userId: new mongoose.Types.ObjectId(req.user.userId),
+                 operation: "withdraw",
+                 amount: parsedAmount
+             });
 
            let user;
            await session.withTransaction(async () => {
@@ -169,7 +177,8 @@ exports.withdraw = async (req, res) =>{
          if (error.statusCode) {
             return res.status(error.statusCode).send({
                 success: false,
-                message: error.message
+                message: error.message,
+                ...(error.details || {})
             });
          }
          res.status(500).send({success:false, 
@@ -191,6 +200,12 @@ exports.transferFunds = async (req, res) =>{
            return res.status(400).send({success:false, 
            message:"invalid transfer details"})
           }
+
+                    await assertOutgoingLimit({
+                        userId: new mongoose.Types.ObjectId(req.user.userId),
+                        operation: "transfer",
+                        amount: parsedAmount
+                    });
 
           let sender;
           let receiver;
@@ -305,7 +320,8 @@ exports.transferFunds = async (req, res) =>{
         if (error.statusCode) {
             return res.status(error.statusCode).send({
                 success: false,
-                message: error.message
+                message: error.message,
+                ...(error.details || {})
             });
         }
         return res.status(500).send({success:false, 

@@ -371,6 +371,37 @@ const notificationPreferenceRules = () => {
     ];
 };
 
+const adminUpdateKycTierRules = () => {
+    return [
+        param('userId')
+            .isMongoId().withMessage('userId must be a valid MongoDB id'),
+
+        body('kycTier')
+            .trim()
+            .notEmpty().withMessage('kycTier is required')
+            .isIn(['unverified', 'tier1', 'tier2', 'tier3']).withMessage('kycTier must be one of unverified, tier1, tier2, tier3')
+    ];
+};
+
+const adminListUsersByTierRules = () => {
+    return [
+        query('kycTier')
+            .optional()
+            .trim()
+            .isIn(['unverified', 'tier1', 'tier2', 'tier3']).withMessage('kycTier must be one of unverified, tier1, tier2, tier3'),
+
+        query('page')
+            .optional()
+            .isInt({ min: 1 }).withMessage('page must be a positive integer')
+            .toInt(),
+
+        query('limit')
+            .optional()
+            .isInt({ min: 1, max: 100 }).withMessage('limit must be between 1 and 100')
+            .toInt()
+    ];
+};
+
 module.exports = {
     registerRules,
     loginRules,
@@ -390,5 +421,7 @@ module.exports = {
     setTransactionPinRules,
     notificationListRules,
     notificationIdParamRules,
-    notificationPreferenceRules
+    notificationPreferenceRules,
+    adminUpdateKycTierRules,
+    adminListUsersByTierRules
 };
