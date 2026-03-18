@@ -150,6 +150,56 @@ const resolveUserTier = async ({ userId, tier }) => {
     return normalizeTier(user.kycTier);
 };
 
+const buildOperationStatus = async ({ userId, operation, limits, now }) => {
+    const isTransfer = operation === "transfer";
+    const dailyLimit = isTransfer ? limits.transferDaily : limits.withdrawDaily;
+    const monthlyLimit = isTransfer ? limits.transferMonthly : limits.withdrawMonthly;
+
+    const [dailyUsed, monthlyUsed] = await Promise.all([
+        getUsedAmount({ userId, operation, fromDate: getUtcDayStart(now) }),
+        getUsedAmount({ userId, operation, fromDate: getUtcMonthStart(now) })
+    ]);
+
+    return {
+        operation,
+        daily: {
+            limit: dailyLimit,
+            used: dailyUsed,
+            remaining: Math.max(0, dailyLimit - dailyUsed)
+        },
+        monthly: {
+            limit: monthlyLimit,
+            used: monthlyUsed,
+            remaining: Math.max(0, monthlyLimit - monthlyUsed)
+        }
+    };
+};
+
+const getOutgoingLimitSnapshot = async ({ userId, tier, operation }) => {
+    const resolvedTier = await resolveUserTier({ userId, tier });
+    const limits = buildTierLimits(resolvedTier);
+    const now = new Date();
+
+    const operations = operation ? [operation] : ["withdraw", "transfer"];
+    const operationStatuses = await Promise.all(
+        operations.map((item) => buildOperationStatus({ userId, operation: item, limits, now }))
+    );
+
+    const statusByOperation = operationStatuses.reduce((acc, item) => {
+        acc[item.operation] = {
+            daily: item.daily,
+            monthly: item.monthly
+        };
+        return acc;
+    }, {});
+
+    return {
+        tier: resolvedTier,
+        asOf: now.toISOString(),
+        operations: statusByOperation
+    };
+};
+
 const assertOutgoingLimit = async ({ userId, operation, amount, tier }) => {
     const resolvedTier = await resolveUserTier({ userId, tier });
     const limits = buildTierLimits(resolvedTier);
@@ -202,5 +252,6 @@ const assertOutgoingLimit = async ({ userId, operation, amount, tier }) => {
 };
 
 module.exports = {
-    assertOutgoingLimit
+    assertOutgoingLimit,
+    getOutgoingLimitSnapshot
 };

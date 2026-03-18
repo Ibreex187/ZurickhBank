@@ -139,6 +139,7 @@ CORS_ORIGIN=http://localhost:3000,http://localhost:5173,https://<your-frontend>.
 - `GET /api/v1/transactions/history`
 - `GET /api/v1/transactions/history/summary`
 - `GET /api/v1/transactions/history/:transactionId`
+- `GET /api/v1/transactions/limits`
 - `POST /api/v1/users/transaction-pin` (set/update 4-digit transaction PIN)
 - `POST /api/v1/beneficiaries/add`
 - `GET /api/v1/beneficiaries`
@@ -185,6 +186,19 @@ Use this endpoint to confirm recipient name while entering account number before
 - `GET /api/v1/transactions/recipient?accountNumber=1234567890`
 - Requires `Authorization: Bearer <token>`
 - Returns recipient `name` and `accountNumber` when found
+
+## Transaction Tier Limits
+
+Use this endpoint to fetch your KYC tier and current transfer/withdraw limits, including daily/monthly used and remaining values.
+
+- `GET /api/v1/transactions/limits`
+- Requires `Authorization: Bearer <token>`
+- Optional query:
+   - `operation=withdraw` or `operation=transfer` (returns only that operation)
+- Response includes:
+   - `tier`
+   - `operations.withdraw.daily/monthly` (`limit`, `used`, `remaining`)
+   - `operations.transfer.daily/monthly` (`limit`, `used`, `remaining`)
 
 ## Admin KYC Tier Management
 

@@ -165,6 +165,15 @@ const transferRecipientLookupRules = () => {
     ];
 };
 
+const transactionLimitsRules = () => {
+    return [
+        query('operation')
+            .optional()
+            .trim()
+            .isIn(['withdraw', 'transfer']).withMessage('operation must be either withdraw or transfer')
+    ];
+};
+
 // Beneficiary validation
 const beneficiaryRules = () => {
     return [
@@ -409,6 +418,7 @@ module.exports = {
     withdrawRules,
     transferRules,
     transferRecipientLookupRules,
+    transactionLimitsRules,
     beneficiaryRules,
     updateProfileRules,
     changePasswordRules,

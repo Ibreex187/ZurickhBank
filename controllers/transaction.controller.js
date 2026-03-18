@@ -4,7 +4,7 @@ const { randomUUID } = require("crypto");
 const mongoose = require("mongoose");
 const { postJournal } = require("../utils/ledger.service");
 const { createNotification } = require("../utils/notification.service");
-const { assertOutgoingLimit } = require("../utils/transaction.limit.service");
+const { assertOutgoingLimit, getOutgoingLimitSnapshot } = require("../utils/transaction.limit.service");
 
 
 exports.deposit = async (req, res) => {
@@ -379,6 +379,37 @@ exports.getTransferRecipient = async (req, res) => {
         return res.status(500).send({
             success: false,
             message: "Error fetching recipient details"
+        });
+    }
+}
+
+exports.getOutgoingLimits = async (req, res) => {
+    try {
+        const requestedOperation = String(req.query.operation || "").trim().toLowerCase();
+        const operation = requestedOperation || undefined;
+
+        const data = await getOutgoingLimitSnapshot({
+            userId: new mongoose.Types.ObjectId(req.user.userId),
+            operation
+        });
+
+        return res.status(200).send({
+            success: true,
+            message: "Transaction limits retrieved successfully",
+            data
+        });
+    } catch (error) {
+        if (error.statusCode) {
+            return res.status(error.statusCode).send({
+                success: false,
+                message: error.message,
+                ...(error.details || {})
+            });
+        }
+
+        return res.status(500).send({
+            success: false,
+            message: "Failed to fetch transaction limits"
         });
     }
 }
