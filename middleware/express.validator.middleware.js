@@ -5,7 +5,7 @@ const validate = (req, res, next) => {
     
     if (!errors.isEmpty()) {
         const messages = errors.array().map(error => ({
-            field: error.param,
+            field: error.path ?? error.param,
             message: error.msg
         }));
         
