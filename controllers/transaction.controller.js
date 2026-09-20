@@ -17,6 +17,7 @@ exports.deposit = async (req, res) => {
        } 
 
        let user;
+       let transactionId;
        await session.withTransaction(async () => {
             user = await UserModel.findById(req.user.userId).session(session)
             if(!user){
@@ -37,6 +38,7 @@ exports.deposit = async (req, res) => {
                 status:"completed"
             })
             await transaction.save({ session })
+            transactionId = transaction.transactionId
 
             await postJournal({
                 session,
@@ -71,7 +73,8 @@ exports.deposit = async (req, res) => {
        })
 
         res.status(200).send({success:true, message:"Deposit successful", data:{
-            balance: user.balance
+            balance: user.balance,
+            transactionId
         }})
 
        
@@ -109,6 +112,7 @@ exports.withdraw = async (req, res) =>{
              });
 
            let user;
+           let transactionId;
            await session.withTransaction(async () => {
                 user = await UserModel.findById(req.user.userId).session(session)
                 if(!user){
@@ -135,6 +139,7 @@ exports.withdraw = async (req, res) =>{
                     status:"completed"
                 })
                 await transaction.save({ session })
+                transactionId = transaction.transactionId
 
                 await postJournal({
                     session,
@@ -170,7 +175,8 @@ exports.withdraw = async (req, res) =>{
 
         res.status(200).send({success:true, 
             message:"Withdrawal successful", data:{
-                balance: user.balance
+                balance: user.balance,
+                transactionId
             }})
 
     } catch (error) {
