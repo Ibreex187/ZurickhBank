@@ -1,14 +1,13 @@
 const TransactionModel = require("../models/transaction.model")
 const mongoose = require('mongoose')
+const { parsePagination, escapeRegex } = require('../utils/pagination')
 
 exports.getTransactionHistory = async (req, res) => {
     try {
         const userId = new mongoose.Types.ObjectId(req.user.userId);
         
-        // Pagination parameters
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
-        const skip = (page - 1) * limit;
+        // Pagination parameters (bounded: at most 100 rows per request)
+        const { page, limit, skip } = parsePagination(req.query, { defaultLimit: 10, maxLimit: 100 });
         
         // Date range filtering
         const startDate = req.query.startDate;
@@ -76,7 +75,8 @@ exports.getTransactionHistory = async (req, res) => {
         
         // Add search filter
         if (search) {
-            const searchRegex = new RegExp(search, 'i'); // Case-insensitive search
+            // Case-insensitive, literal match: user text must not be treated as a regex pattern
+            const searchRegex = new RegExp(escapeRegex(search), 'i');
             
             let searchConditions = [];
             

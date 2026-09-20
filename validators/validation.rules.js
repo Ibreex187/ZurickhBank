@@ -287,6 +287,57 @@ const forgotPasswordResetRules = () => {
     ];
 };
 
+const paginationRules = () => {
+    return [
+        query('page')
+            .optional()
+            .isInt({ min: 1, max: 100000 }).withMessage('page must be a positive integer')
+            .toInt(),
+
+        query('limit')
+            .optional()
+            .isInt({ min: 1, max: 100 }).withMessage('limit must be between 1 and 100')
+            .toInt()
+    ];
+};
+
+const dateRangeRules = () => {
+    return [
+        query('startDate')
+            .optional({ values: 'falsy' })
+            .isISO8601().withMessage('startDate must be a valid ISO date'),
+
+        query('endDate')
+            .optional({ values: 'falsy' })
+            .isISO8601().withMessage('endDate must be a valid ISO date')
+    ];
+};
+
+const transactionHistoryRules = () => {
+    return [
+        ...paginationRules(),
+        ...dateRangeRules(),
+
+        query('minAmount')
+            .optional({ values: 'falsy' })
+            .isFloat({ min: 0 }).withMessage('minAmount must be a non-negative number'),
+
+        query('maxAmount')
+            .optional({ values: 'falsy' })
+            .isFloat({ min: 0 }).withMessage('maxAmount must be a non-negative number'),
+
+        query('searchBy')
+            .optional({ values: 'falsy' })
+            .isIn(['recipient', 'transactionId', 'amount', 'all']).withMessage('searchBy is invalid'),
+
+        query('search')
+            .optional({ values: 'falsy' })
+            .isString().withMessage('search must be text')
+            .trim()
+            .isLength({ max: 100 }).withMessage('search cannot exceed 100 characters')
+    ];
+};
+
 const ledgerHistoryRules = () => {
     return [
         query('accountType')
@@ -431,6 +482,9 @@ module.exports = {
     forgotPasswordRequestRules,
     forgotPasswordVerifyRules,
     forgotPasswordResetRules,
+    paginationRules,
+    dateRangeRules,
+    transactionHistoryRules,
     ledgerHistoryRules,
     accountStatementRules,
     transactionPinRules,
