@@ -66,6 +66,29 @@ app.use(rateLimitMiddleware);
 app.use(express.urlencoded({ extended: true, limit: process.env.REQUEST_BODY_LIMIT || '100kb' }));
 app.use(express.json({ limit: process.env.REQUEST_BODY_LIMIT || '100kb' }));
 
+// Public health check. It must be registered BEFORE the routers below: the notification router
+// applies authMiddleware to everything under /api/v1, which would otherwise answer this with 401.
+app.get('/api/v1/health', (req, res) => {
+  const dbStates = {
+    0: 'disconnected',
+    1: 'connected',
+    2: 'connecting',
+    3: 'disconnecting'
+  };
+
+  const dbState = dbStates[mongoose.connection.readyState] || 'unknown';
+
+  res.status(200).send({
+    success: true,
+    message: 'API is healthy',
+    data: {
+      uptime: process.uptime(),
+      database: dbState,
+      timestamp: new Date().toISOString()
+    }
+  });
+});
+
 app.use('/api/v1', transactionRouter);
 app.use('/api/v1', userRouter);
 app.use('/api/v1/auth', authRouter);
@@ -89,27 +112,6 @@ app.get('/', (req, res) => {
 
 app.get('/favicon.ico', (req, res) => {
   res.status(204).end();
-});
-
-app.get('/api/v1/health', (req, res) => {
-  const dbStates = {
-    0: 'disconnected',
-    1: 'connected',
-    2: 'connecting',
-    3: 'disconnecting'
-  };
-
-  const dbState = dbStates[mongoose.connection.readyState] || 'unknown';
-
-  res.status(200).send({
-    success: true,
-    message: 'API is healthy',
-    data: {
-      uptime: process.uptime(),
-      database: dbState,
-      timestamp: new Date().toISOString()
-    }
-  });
 });
 
 app.get("/api/v1/test", authMiddleware, (req, res) => {
