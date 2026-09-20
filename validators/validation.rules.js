@@ -114,6 +114,12 @@ const transferRules = () => {
             .isLength({ min: 10, max: 10 }).withMessage('Account number must be exactly 10 digits')
             .isNumeric().withMessage('Account number must contain only digits'),
 
+        body('description')
+            .optional({ values: 'falsy' })
+            .isString().withMessage('Description must be text')
+            .trim()
+            .isLength({ max: 200 }).withMessage('Description cannot exceed 200 characters'),
+
         body('transactionPin')
             .trim()
             .notEmpty().withMessage('Transaction PIN is required')

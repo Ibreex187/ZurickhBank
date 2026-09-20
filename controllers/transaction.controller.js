@@ -250,7 +250,8 @@ exports.transferFunds = async (req, res) =>{
                 transactionId: randomUUID(),
                 type:"transfer",
                 amount: parsedAmount,
-                sender: sender._id, 
+                description: String(req.body.description || "").trim().slice(0, 200),
+                sender: sender._id,
                 receiver: receiver._id,
                 status:"completed"
             })
