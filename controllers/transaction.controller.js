@@ -6,15 +6,19 @@ const { postJournal } = require("../utils/ledger.service");
 const { createNotification } = require("../utils/notification.service");
 const { assertOutgoingLimit, getOutgoingLimitSnapshot } = require("../utils/transaction.limit.service");
 
+// Defense in depth: validators/validation.rules.js (depositRules/withdrawRules/transferRules)
+// already enforces this on the route, but a controller shouldn't trust that unconditionally -
+// this is what actually stopped a mistyped/unbounded amount from reaching user.balance before.
+const MAX_TRANSACTION_AMOUNT = 50000000;
 
 exports.deposit = async (req, res) => {
     const session = await mongoose.startSession();
     try {
        const parsedAmount = Number(req.body.amount)
-       if(!Number.isFinite(parsedAmount) || parsedAmount <= 0){
-        return res.status(400).send({success:false, 
-        message:"deposit must be greater than 0"})
-       } 
+       if(!Number.isFinite(parsedAmount) || parsedAmount <= 0 || parsedAmount > MAX_TRANSACTION_AMOUNT){
+        return res.status(400).send({success:false,
+        message:`deposit must be greater than 0 and no more than ${MAX_TRANSACTION_AMOUNT.toLocaleString()}`})
+       }
 
        let user;
        let transactionId;
@@ -100,9 +104,9 @@ exports.withdraw = async (req, res) =>{
     const session = await mongoose.startSession();
     try {
          const parsedAmount = Number(req.body.amount)
-         if(!Number.isFinite(parsedAmount) || parsedAmount <=0){
-            return res.status(400).send({success:false, 
-            message:"withdrawal must be greater than 0"})
+         if(!Number.isFinite(parsedAmount) || parsedAmount <=0 || parsedAmount > MAX_TRANSACTION_AMOUNT){
+            return res.status(400).send({success:false,
+            message:`withdrawal must be greater than 0 and no more than ${MAX_TRANSACTION_AMOUNT.toLocaleString()}`})
            }
 
              await assertOutgoingLimit({
@@ -202,8 +206,8 @@ exports.transferFunds = async (req, res) =>{
         const { receiverAccountNumber } = req.body;
         const parsedAmount = Number(req.body.amount);
 
-        if(!Number.isFinite(parsedAmount) || parsedAmount <=0 || !receiverAccountNumber){
-           return res.status(400).send({success:false, 
+        if(!Number.isFinite(parsedAmount) || parsedAmount <=0 || parsedAmount > MAX_TRANSACTION_AMOUNT || !receiverAccountNumber){
+           return res.status(400).send({success:false,
            message:"invalid transfer details"})
           }
 

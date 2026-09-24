@@ -1,5 +1,14 @@
 const { body, query, param } = require('express-validator');
 const validate = require('../middleware/express.validator.middleware');
+
+// Single-transaction ceiling for the main account. Savings deposits already cap at 1,000,000
+// (see routers/savings.routes.js); main-account deposit/withdraw/transfer never had an upper
+// bound at all - only a minimum - which let a mistyped or malicious amount be added to a
+// balance unchecked (found via a real deposit that produced a multi-quintillion-naira balance).
+// Set comfortably above the highest tier's monthly transfer limit (see
+// utils/transaction.limit.service.js, tier3: 30,000,000/month) so it never blocks a legitimate
+// transaction, only an obviously-wrong one.
+const MAX_TRANSACTION_AMOUNT = 50000000;
 // Register validation
 const registerRules = () => {
     return [
@@ -73,7 +82,8 @@ const depositRules = () => {
     return [
         body('amount')
             .notEmpty().withMessage('Amount is required')
-            .isFloat({ min: 0.01 }).withMessage('Deposit amount must be greater than 0')
+            .isFloat({ min: 0.01, max: MAX_TRANSACTION_AMOUNT })
+            .withMessage(`Deposit amount must be greater than 0 and no more than ${MAX_TRANSACTION_AMOUNT.toLocaleString()}`)
             .toFloat(),
 
         body('transactionPin')
@@ -89,7 +99,8 @@ const withdrawRules = () => {
     return [
         body('amount')
             .notEmpty().withMessage('Amount is required')
-            .isFloat({ min: 0.01 }).withMessage('Withdrawal amount must be greater than 0')
+            .isFloat({ min: 0.01, max: MAX_TRANSACTION_AMOUNT })
+            .withMessage(`Withdrawal amount must be greater than 0 and no more than ${MAX_TRANSACTION_AMOUNT.toLocaleString()}`)
             .toFloat(),
 
         body('transactionPin')
@@ -105,7 +116,8 @@ const transferRules = () => {
     return [
         body('amount')
             .notEmpty().withMessage('Amount is required')
-            .isFloat({ min: 0.01 }).withMessage('Transfer amount must be greater than 0')
+            .isFloat({ min: 0.01, max: MAX_TRANSACTION_AMOUNT })
+            .withMessage(`Transfer amount must be greater than 0 and no more than ${MAX_TRANSACTION_AMOUNT.toLocaleString()}`)
             .toFloat(),
         
         body('receiverAccountNumber')
@@ -469,6 +481,7 @@ const adminListUsersByTierRules = () => {
 };
 
 module.exports = {
+    MAX_TRANSACTION_AMOUNT,
     registerRules,
     loginRules,
     depositRules,
