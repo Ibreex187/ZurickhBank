@@ -17,7 +17,7 @@
 			<p>Thank you for creating an account with Zurich Bank. We're delighted to have you on board.</p>
 
 			<% if (accountNumber) { %>
-				<p>Your account number: <strong><%= accountNumber %></strong></p>
+				<p>Sort code: <strong><%= sortCode %></strong> &nbsp; Account number: <strong><%= accountNumber %></strong></p>
 			<% } %>
 
 			<p>If you need help, contact us at <a href="mailto:<%= supportEmail || 'support@ZurichBank.example' %>"><%= supportEmail || 'support@ZurichBank.example' %></a>.</p>

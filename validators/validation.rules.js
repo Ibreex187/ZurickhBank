@@ -1,14 +1,15 @@
 const { body, query, param } = require('express-validator');
 const validate = require('../middleware/express.validator.middleware');
+const { ACCOUNT_NUMBER_LENGTH } = require('../utils/bankIdentity');
 
-// Single-transaction ceiling for the main account. Savings deposits already cap at 1,000,000
+// Single-transaction ceiling for the main account. Savings deposits already cap at 1,000
 // (see routers/savings.routes.js); main-account deposit/withdraw/transfer never had an upper
 // bound at all - only a minimum - which let a mistyped or malicious amount be added to a
-// balance unchecked (found via a real deposit that produced a multi-quintillion-naira balance).
+// balance unchecked (found via a real deposit that produced an absurdly large balance).
 // Set comfortably above the highest tier's monthly transfer limit (see
-// utils/transaction.limit.service.js, tier3: 30,000,000/month) so it never blocks a legitimate
+// utils/transaction.limit.service.js, tier3: 30,000/month) so it never blocks a legitimate
 // transaction, only an obviously-wrong one.
-const MAX_TRANSACTION_AMOUNT = 50000000;
+const MAX_TRANSACTION_AMOUNT = 50000;
 // Register validation
 const registerRules = () => {
     return [
@@ -123,7 +124,7 @@ const transferRules = () => {
         body('receiverAccountNumber')
             .trim()
             .notEmpty().withMessage('Receiver account number is required')
-            .isLength({ min: 10, max: 10 }).withMessage('Account number must be exactly 10 digits')
+            .isLength({ min: ACCOUNT_NUMBER_LENGTH, max: ACCOUNT_NUMBER_LENGTH }).withMessage(`Account number must be exactly ${ACCOUNT_NUMBER_LENGTH} digits`)
             .isNumeric().withMessage('Account number must contain only digits'),
 
         body('description')
@@ -178,7 +179,7 @@ const transferRecipientLookupRules = () => {
         query('accountNumber')
             .trim()
             .notEmpty().withMessage('Account number is required')
-            .isLength({ min: 10, max: 10 }).withMessage('Account number must be exactly 10 digits')
+            .isLength({ min: ACCOUNT_NUMBER_LENGTH, max: ACCOUNT_NUMBER_LENGTH }).withMessage(`Account number must be exactly ${ACCOUNT_NUMBER_LENGTH} digits`)
             .isNumeric().withMessage('Account number must contain only digits')
     ];
 };
@@ -198,7 +199,7 @@ const beneficiaryRules = () => {
         body('accountNumber')
             .trim()
             .notEmpty().withMessage('Account number is required')
-            .isLength({ min: 10, max: 10 }).withMessage('Account number must be exactly 10 digits')
+            .isLength({ min: ACCOUNT_NUMBER_LENGTH, max: ACCOUNT_NUMBER_LENGTH }).withMessage(`Account number must be exactly ${ACCOUNT_NUMBER_LENGTH} digits`)
             .isNumeric().withMessage('Account number must contain only digits')
     ];
 };

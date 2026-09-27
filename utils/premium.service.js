@@ -3,8 +3,8 @@ const SavingsTransactionModel = require('../models/savings.transaction.model');
 const InvestmentModel = require('../models/investment.model');
 
 const THRESHOLDS = {
-  MINIMUM_BALANCE: 100000,          // ₦100,000 main balance
-  MINIMUM_SAVINGS: 10000,           // ₦10,000 savings balance
+  MINIMUM_BALANCE: 100,             // £100 main balance
+  MINIMUM_SAVINGS: 10,              // £10 savings balance
   MINIMUM_TRANSACTIONS: 10,         // 10 completed main transactions
   MINIMUM_SAVINGS_TRANSACTIONS: 5,  // 5 completed savings transactions
   MINIMUM_BENEFICIARIES: 1,         // at least 1 saved beneficiary

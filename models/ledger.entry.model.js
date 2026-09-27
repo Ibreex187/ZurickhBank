@@ -45,7 +45,7 @@ const ledgerEntrySchema = new mongoose.Schema({
     },
     currency: {
         type: String,
-        default: "NGN"
+        default: "GBP"
     },
     metadata: {
         type: Object,

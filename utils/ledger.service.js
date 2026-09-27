@@ -13,7 +13,7 @@ const postJournal = async ({
     referenceId,
     description,
     entries,
-    currency = "NGN",
+    currency = "GBP",
     metadata = {}
 }) => {
     if (!Array.isArray(entries) || entries.length < 2) {

@@ -5,11 +5,11 @@ const mongoose = require("mongoose");
 const { postJournal } = require("../utils/ledger.service");
 const { createNotification } = require("../utils/notification.service");
 const { assertOutgoingLimit, getOutgoingLimitSnapshot } = require("../utils/transaction.limit.service");
-
 // Defense in depth: validators/validation.rules.js (depositRules/withdrawRules/transferRules)
 // already enforces this on the route, but a controller shouldn't trust that unconditionally -
 // this is what actually stopped a mistyped/unbounded amount from reaching user.balance before.
-const MAX_TRANSACTION_AMOUNT = 50000000;
+// Imported (not re-declared) so the two layers can't quietly drift apart.
+const { MAX_TRANSACTION_AMOUNT } = require("../validators/validation.rules");
 
 exports.deposit = async (req, res) => {
     const session = await mongoose.startSession();

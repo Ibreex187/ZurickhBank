@@ -2,6 +2,7 @@ const nodemailer = require('nodemailer');
 const ejs = require('ejs');
 const path = require('path');
 const { promisify } = require('util');
+const { SORT_CODE_DISPLAY } = require('./bankIdentity');
 
 const renderFile = promisify(ejs.renderFile);
 
@@ -49,12 +50,12 @@ async function sendWelcomeEmail(to, name, username, accountNumber = '') {
   let htmlBody;
   try {
     const templatePath = path.join(__dirname, '..', 'middleware', 'views', 'welcomeMail.ejs');
-    htmlBody = await renderFile(templatePath, { name, username, accountNumber, supportEmail: process.env.SUPPORT_EMAIL });
+    htmlBody = await renderFile(templatePath, { name, username, accountNumber, sortCode: SORT_CODE_DISPLAY, supportEmail: process.env.SUPPORT_EMAIL });
   } catch (err) {
     console.error('EJS render failed, falling back to default HTML:', err.message);
     htmlBody = `
       <p>Hi ${name || username || 'there'},</p>
-      <p>Welcome to Zurich Bank! Your account (${accountNumber || 'N/A'}) has been successfully created.</p>
+      <p>Welcome to Zurich Bank! Your account (sort code ${SORT_CODE_DISPLAY}, account number ${accountNumber || 'N/A'}) has been successfully created.</p>
       <p>— The Zurich Bank Team</p>
     `;
   }

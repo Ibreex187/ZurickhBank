@@ -183,7 +183,7 @@ Then include `transactionPin` in money-moving request bodies:
 
 Use this endpoint to confirm recipient name while entering account number before transfer submission.
 
-- `GET /api/v1/transactions/recipient?accountNumber=1234567890`
+- `GET /api/v1/transactions/recipient?accountNumber=12345678`
 - Requires `Authorization: Bearer <token>`
 - Returns recipient `name` and `accountNumber` when found
 

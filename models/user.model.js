@@ -1,4 +1,7 @@
 const mongoose  = require("mongoose");
+const { ACCOUNT_NUMBER_LENGTH } = require("../utils/bankIdentity");
+
+const ACCOUNT_NUMBER_PATTERN = new RegExp(`^\\d{${ACCOUNT_NUMBER_LENGTH}}$`);
 
 const UserSchema = new mongoose.Schema({
 firstName: {type: String, required: true},
@@ -12,9 +15,9 @@ accountNumber: {
     type: String,
     required: true,
     unique: true,
-    match: [/^\d{10}$/, "Account number must be exactly 10 digits"]
+    match: [ACCOUNT_NUMBER_PATTERN, `Account number must be exactly ${ACCOUNT_NUMBER_LENGTH} digits`]
 },
-balance: {type: Number, default: 99999},
+balance: {type: Number, default: 100},
 savingsBalance: {type: Number, default: 0},
 beneficiaries: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
 kycTier: { type: String, enum: ["unverified", "tier1", "tier2", "tier3"], default: "unverified" },

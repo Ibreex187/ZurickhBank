@@ -14,8 +14,8 @@ const amountValidation = [
         .isFloat({ min: 0.01 })
         .withMessage('Amount must be a positive number (minimum 0.01)')
         .custom((value) => {
-            if (value > 1000000) {
-                throw new Error('Amount cannot exceed 1,000,000');
+            if (value > 1000) {
+                throw new Error('Amount cannot exceed 1,000');
             }
             return true;
         })

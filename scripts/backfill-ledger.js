@@ -177,7 +177,7 @@ const buildLedgerDocs = ({
         userId: entry.userId || null,
         debit: roundMoney(entry.debit || 0),
         credit: roundMoney(entry.credit || 0),
-        currency: "NGN",
+        currency: "GBP",
         metadata,
         createdAt,
         updatedAt: createdAt

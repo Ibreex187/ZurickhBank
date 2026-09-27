@@ -6,28 +6,28 @@ const SUPPORTED_TIERS = ["unverified", "tier1", "tier2", "tier3"];
 
 const DEFAULT_TIER_LIMITS = {
     unverified: {
-        withdrawDaily: 50000,
-        withdrawMonthly: 300000,
-        transferDaily: 100000,
-        transferMonthly: 500000
+        withdrawDaily: 50,
+        withdrawMonthly: 300,
+        transferDaily: 100,
+        transferMonthly: 500
     },
     tier1: {
-        withdrawDaily: 200000,
-        withdrawMonthly: 2000000,
-        transferDaily: 500000,
-        transferMonthly: 5000000
+        withdrawDaily: 200,
+        withdrawMonthly: 2000,
+        transferDaily: 500,
+        transferMonthly: 5000
     },
     tier2: {
-        withdrawDaily: 500000,
-        withdrawMonthly: 5000000,
-        transferDaily: 1000000,
-        transferMonthly: 12000000
+        withdrawDaily: 500,
+        withdrawMonthly: 5000,
+        transferDaily: 1000,
+        transferMonthly: 12000
     },
     tier3: {
-        withdrawDaily: 1000000,
-        withdrawMonthly: 15000000,
-        transferDaily: 3000000,
-        transferMonthly: 30000000
+        withdrawDaily: 1000,
+        withdrawMonthly: 15000,
+        transferDaily: 3000,
+        transferMonthly: 30000
     }
 };
 

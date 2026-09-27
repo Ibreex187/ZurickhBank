@@ -46,17 +46,17 @@ describe('API smoke tests', () => {
     expect(response.body).toHaveProperty('success', false);
   });
 
-  it('User model should apply opening balance and enforce 10-digit account number', () => {
+  it('User model should apply opening balance and enforce 8-digit account number', () => {
     const validUser = new UserModel({
       firstName: 'Policy',
       lastName: 'Check',
       userName: 'policycheckuser',
       email: 'policy.check@example.com',
       password: 'hashed-password',
-      accountNumber: '1234567890'
+      accountNumber: '12345678'
     });
 
-    expect(validUser.balance).toBe(99999);
+    expect(validUser.balance).toBe(100);
 
     const invalidUser = new UserModel({
       firstName: 'Invalid',

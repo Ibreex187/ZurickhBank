@@ -1,11 +1,10 @@
 const bcrypt = require("bcrypt");
 const UserModel = require("../models/user.model");
 const EmailRegistryModel = require("../models/email.registry.model");
+const { ACCOUNT_NUMBER_MIN, ACCOUNT_NUMBER_MAX, ACCOUNT_NUMBER_LENGTH } = require("./bankIdentity");
 
 const DUPLICATE_KEY_ERROR_CODE = 11000;
-const ACCOUNT_NUMBER_MIN = 1000000000;
-const ACCOUNT_NUMBER_MAX = 9999999999;
-const SIGN_UP_BONUS_BALANCE = Number(process.env.SIGN_UP_BONUS_BALANCE || 99999);
+const SIGN_UP_BONUS_BALANCE = Number(process.env.SIGN_UP_BONUS_BALANCE || 100);
 const NO_SIGN_UP_BONUS_BALANCE = Number(process.env.NO_SIGN_UP_BONUS_BALANCE || 0);
 
 const getMaxAccountNumberRetries = () => {
@@ -20,7 +19,7 @@ const getMaxAccountNumberRetries = () => {
 
 const generateAccountNumber = () => {
     const generated = Math.floor(ACCOUNT_NUMBER_MIN + Math.random() * (ACCOUNT_NUMBER_MAX - ACCOUNT_NUMBER_MIN + 1));
-    return String(generated).padStart(10, "0");
+    return String(generated).padStart(ACCOUNT_NUMBER_LENGTH, "0");
 };
 
 const buildValidationError = (message) => {

@@ -81,7 +81,7 @@ describe("Main-account transaction amount ceiling", () => {
     it("rejects a transfer above MAX_TRANSACTION_AMOUNT", async () => {
         const { errors } = await runRules(transferRules(), {
             amount: MAX_TRANSACTION_AMOUNT + 1,
-            receiverAccountNumber: "1234567890",
+            receiverAccountNumber: "12345678",
             transactionPin: VALID_PIN,
         });
 
@@ -93,7 +93,7 @@ describe("Main-account transaction amount ceiling", () => {
     it("still accepts an ordinary transfer amount", async () => {
         const { errors } = await runRules(transferRules(), {
             amount: 25000,
-            receiverAccountNumber: "1234567890",
+            receiverAccountNumber: "12345678",
             transactionPin: VALID_PIN,
         });
 
