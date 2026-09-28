@@ -4,7 +4,7 @@ const EmailRegistryModel = require("../models/email.registry.model");
 const { ACCOUNT_NUMBER_MIN, ACCOUNT_NUMBER_MAX, ACCOUNT_NUMBER_LENGTH } = require("./bankIdentity");
 
 const DUPLICATE_KEY_ERROR_CODE = 11000;
-const SIGN_UP_BONUS_BALANCE = Number(process.env.SIGN_UP_BONUS_BALANCE || 100);
+const SIGN_UP_BONUS_BALANCE = Number(process.env.SIGN_UP_BONUS_BALANCE || 10);
 const NO_SIGN_UP_BONUS_BALANCE = Number(process.env.NO_SIGN_UP_BONUS_BALANCE || 0);
 
 const getMaxAccountNumberRetries = () => {

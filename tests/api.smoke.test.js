@@ -56,7 +56,7 @@ describe('API smoke tests', () => {
       accountNumber: '12345678'
     });
 
-    expect(validUser.balance).toBe(100);
+    expect(validUser.balance).toBe(10);
 
     const invalidUser = new UserModel({
       firstName: 'Invalid',

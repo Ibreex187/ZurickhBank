@@ -17,7 +17,7 @@ accountNumber: {
     unique: true,
     match: [ACCOUNT_NUMBER_PATTERN, `Account number must be exactly ${ACCOUNT_NUMBER_LENGTH} digits`]
 },
-balance: {type: Number, default: 100},
+balance: {type: Number, default: 10},
 savingsBalance: {type: Number, default: 0},
 beneficiaries: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
 kycTier: { type: String, enum: ["unverified", "tier1", "tier2", "tier3"], default: "unverified" },
